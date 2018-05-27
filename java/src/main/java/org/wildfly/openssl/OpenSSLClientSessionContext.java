@@ -86,9 +86,9 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
             final ClientSessionInfo foundSessionPtr = getCacheValue(key);
             if (foundSessionPtr != null) {
                 if(getSession(foundSessionPtr.sessionId) != null) {
-                    removeCacheEntry(key, true);
+                    removeCacheEntry(key);
                 } else {
-                    removeCacheEntry(key, false);
+                    removeCacheEntry(key);
                 }
             }
             addCacheEntry(key, new ClientSessionInfo(sessionPointer, sessionId, System.currentTimeMillis()));
@@ -102,10 +102,15 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
             // set with the session pointer from the found session
             final ClientSessionInfo foundSessionPtr = getCacheValue(key);
             if (foundSessionPtr != null) {
-                if(getSession(foundSessionPtr.sessionId) == null) {
-                    removeCacheEntry(key, false);
+                final OpenSSlSession existingSession = getOpenSSlSession(foundSessionPtr.sessionId);
+                if(existingSession == null) {
+                    removeCacheEntry(key);
                 } else {
-                    SSL_INSTANCE.setSession(ssl, foundSessionPtr.session);
+                    synchronized (existingSession) {
+                        if (existingSession.isValid()) {
+                            SSL_INSTANCE.setSession(ssl, foundSessionPtr.session);
+                        }
+                    }
                 }
             }
         }
@@ -119,7 +124,7 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
                 for (int i = 0; i < removeSize; i++) {
                     final CacheEntry oldest = accessQueue.poll();
                     if (oldest != null) {
-                        removeCacheEntry(oldest.key(), true);
+                        removeCacheEntry(oldest.key());
                     } else {
                         // No need to continue as there are no more entries
                         break;
@@ -143,7 +148,7 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
                 // Remove the oldest entry
                 final CacheEntry oldest = accessQueue.poll();
                 if (oldest != value) {
-                    removeCacheEntry(oldest.key(), true);
+                    removeCacheEntry(oldest.key());
                 }
             }
         }
@@ -157,7 +162,7 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
         if (timeout > 0) {
             long expires = cacheEntry.getTime() + (timeout * 1000);
             if (System.currentTimeMillis() > expires) {
-                removeCacheEntry(key, true);
+                removeCacheEntry(key);
                 return null;
             }
         }
@@ -169,7 +174,7 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
         return cacheEntry.getValue();
     }
 
-    private ClientSessionInfo removeCacheEntry(final ClientSessionKey key, boolean sessionStillValid) {
+    private ClientSessionInfo removeCacheEntry(final ClientSessionKey key) {
         CacheEntry remove = cache.remove(key);
         if (remove != null) {
             Object old = remove.clearToken();
@@ -177,8 +182,8 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
                 accessQueue.removeToken(old);
             }
             final ClientSessionInfo result =  remove.getValue();
-            if (result != null && sessionStillValid) {
-                SSL_INSTANCE.invalidateSession(result.session);
+            if (result != null) {
+                invalidateIfPresent(result.sessionId);
             }
             return result;
         } else {

@@ -54,8 +54,7 @@ WF_OPENSSL(void, setSSLOptions)(JNIEnv *e, jobject o, jlong ssl, jint opt);
 WF_OPENSSL(void, clearSSLOptions)(JNIEnv *e, jobject o, jlong ssl, jint opt);
 WF_OPENSSL(jboolean, setCipherSuite)(JNIEnv *e, jobject o, jlong ctx, jstring ciphers);
 WF_OPENSSL(jboolean, setCARevocation)(JNIEnv *e, jobject o, jlong ctx, jstring file, jstring path);
-WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jobjectArray javaCerts, jbyteArray javaKey,
-                                     jint idx);
+WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jbyteArray javaCert, jobjectArray intermediateCerts, jbyteArray javaKey, jint idx);
 WF_OPENSSL(void, setCertVerifyCallback)(JNIEnv *e, jobject o, jlong ctx, jobject verifier);
 WF_OPENSSL(jboolean, setSessionIdContext)(JNIEnv *e, jobject o, jlong ctx, jbyteArray sidCtx);
 WF_OPENSSL(jlong, newSSL)(JNIEnv *e, jobject o, jlong ctx /* tcn_ssl_ctxt_t * */, jboolean server);
@@ -890,7 +889,7 @@ cleanup:
 # define SSL_CTX_build_cert_chain(ctx, flags) \
 	ssl_methods.SSL_CTX_ctrl(ctx,SSL_CTRL_BUILD_CERT_CHAIN, flags, NULL)
 
-WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jobjectArray javaCerts, jbyteArray javaKey,jint idx) 
+WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jbyteArray javaCert, jobjectArray intermediateCerts, jbyteArray javaKey, jint idx)
 {
 #pragma comment(linker, "/EXPORT:"__FUNCTION__"="__FUNCDNAME__)
     /* we get the key contents into a byte array */
@@ -939,10 +938,10 @@ WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jobjectArr
 		return JNI_FALSE;
 	}
 
-	chain = (*e)->GetArrayLength(e, javaCerts);
+	chain = (*e)->GetArrayLength(e, intermediateCerts);
 	TCN_ASSERT(chain != 0);
 
-	javaCert = (*e)->GetObjectArrayElement(e, javaCerts, 0);
+	javaCert = (*e)->GetObjectArrayElement(e, intermediateCerts, 0);
 	bufferPtr = (*e)->GetByteArrayElements(e, javaCert, NULL);
 	lengthOfCert = (*e)->GetArrayLength(e, javaCert);
 	cert = malloc(lengthOfCert);
@@ -972,7 +971,7 @@ WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jobjectArr
 
 	SSL_CTX_clear_extra_chain_certs(c->ctx);
 	for (i = 1; i < chain; i++) {
-		javaCert = (*e)->GetObjectArrayElement(e, javaCerts, i);
+		javaCert = (*e)->GetObjectArrayElement(e, intermediateCerts, i);
 		bufferPtr = (*e)->GetByteArrayElements(e, javaCert, NULL);
 		lengthOfCert = (*e)->GetArrayLength(e, javaCert);
 		cert = malloc(lengthOfCert);
