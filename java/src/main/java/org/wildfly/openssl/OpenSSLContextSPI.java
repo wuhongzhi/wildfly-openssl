@@ -33,6 +33,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -224,7 +225,9 @@ public abstract class OpenSSLContextSPI extends SSLContextSpi {
 								idx = SSL.SSL_AIDX_ECC;
 								break;
 							}
-                            SSL_INSTANCE.setCertificate(ctx, certs, sb.toString().getBytes(StandardCharsets.US_ASCII), idx);
+                            SSL_INSTANCE.setCertificate(ctx, certs[0], 
+                            		Arrays.copyOfRange(certs, 1, certs.length), 
+                            		sb.toString().getBytes(StandardCharsets.US_ASCII), idx);
                             break;
                         }
                     }

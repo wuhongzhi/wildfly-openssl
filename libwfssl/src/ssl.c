@@ -662,7 +662,7 @@ WF_OPENSSL(jobjectArray, getCiphers)(JNIEnv *e, jobject o, jlong ssl)
         return NULL;
     }
 
-    /* Create the byte[][] array that holds all the certs */
+    /* Create the byte[][] array that holds all the certs */
     array = (*e)->NewObjectArray(e, len, stringClass, NULL);
 
     for (i = 0; i < len; i++) {
@@ -899,7 +899,6 @@ WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jbyteArray
     jsize lengthOfCert;
     tcn_ssl_ctxt_t *c;
     BIO * bio;
-	jbyteArray javaCert;
 	X509* x509;
 	int i;
 	jsize chain;
@@ -941,12 +940,10 @@ WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jbyteArray
 	chain = (*e)->GetArrayLength(e, intermediateCerts);
 	TCN_ASSERT(chain != 0);
 
-	javaCert = (*e)->GetObjectArrayElement(e, intermediateCerts, 0);
 	bufferPtr = (*e)->GetByteArrayElements(e, javaCert, NULL);
 	lengthOfCert = (*e)->GetArrayLength(e, javaCert);
 	cert = malloc(lengthOfCert);
 	memmove(cert, bufferPtr, lengthOfCert);
-	(*e)->ReleaseByteArrayElements(e, javaCert, bufferPtr, 0);
 
 	tmp = (const unsigned char *)cert;
 	c->certs[idx] = crypto_methods.d2i_X509(NULL, &tmp, lengthOfCert);
@@ -970,7 +967,7 @@ WF_OPENSSL(jboolean, setCertificate)(JNIEnv *e, jobject o, jlong ctx, jbyteArray
     }
 
 	SSL_CTX_clear_extra_chain_certs(c->ctx);
-	for (i = 1; i < chain; i++) {
+	for (i = 0; i < chain; i++) {
 		javaCert = (*e)->GetObjectArrayElement(e, intermediateCerts, i);
 		bufferPtr = (*e)->GetByteArrayElements(e, javaCert, NULL);
 		lengthOfCert = (*e)->GetArrayLength(e, javaCert);
@@ -1046,7 +1043,7 @@ static int SSL_cert_verify(X509_STORE_CTX *ctx, void *arg) {
     len = crypto_methods.sk_num(sk);
     tcn_get_java_env(&e);
 
-    /*  Create the byte[][] array that holds all the certs */
+    /*  Create the byte[][] array that holds all the certs */
     array = (*e)->NewObjectArray(e, len, byteArrayClass, NULL);
 
     for(i = 0; i < len; i++) {

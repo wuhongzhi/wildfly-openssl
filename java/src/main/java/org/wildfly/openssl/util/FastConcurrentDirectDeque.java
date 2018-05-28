@@ -88,6 +88,7 @@ import sun.misc.Unsafe;
  * @param <E> the type of elements held in this collection
  */
 
+@SuppressWarnings({"restriction"})
 public class FastConcurrentDirectDeque<E>
     extends ConcurrentDirectDeque<E> implements Deque<E>, Serializable {
 
@@ -347,7 +348,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * Links e as first element.
      */
-    private Node linkFirst(E e) {
+    private Node<E> linkFirst(E e) {
         checkNotNull(e);
         final Node<E> newNode = new Node<>(e);
 
@@ -380,7 +381,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * Links e as last element.
      */
-    private Node linkLast(E e) {
+    private Node<E> linkLast(E e) {
         checkNotNull(e);
         final Node<E> newNode = new Node<>(e);
 
@@ -921,12 +922,13 @@ public class FastConcurrentDirectDeque<E>
         return linkLast(e);
     }
 
+    @SuppressWarnings("unchecked")
     public void removeToken(Object token) {
         if (!(token instanceof Node)) {
             throw new IllegalArgumentException();
         }
 
-        Node node = (Node) (token);
+        Node<E> node = (Node<E>) (token);
         while (! node.casItem(node.item, null)) {}
         unlink(node);
     }

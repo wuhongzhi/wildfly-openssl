@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 /**
  * {@link DirectByteBufferDeallocator} Utility class used to free direct buffer memory.
  */
+@SuppressWarnings({"restriction"})
 public final class DirectByteBufferDeallocator {
 
     private static final Logger logger = Logger.getLogger(DirectByteBufferDeallocator.class.getName());

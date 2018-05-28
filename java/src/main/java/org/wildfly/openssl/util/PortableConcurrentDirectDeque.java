@@ -270,7 +270,9 @@ public class PortableConcurrentDirectDeque<E>
      */
     private transient volatile Node<E> tail;
 
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<PortableConcurrentDirectDeque, Node> headUpdater = AtomicReferenceFieldUpdater.newUpdater(PortableConcurrentDirectDeque.class, Node.class, "head");
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<PortableConcurrentDirectDeque, Node> tailUpdater = AtomicReferenceFieldUpdater.newUpdater(PortableConcurrentDirectDeque.class, Node.class, "tail");
 
     private static final Node<Object> PREV_TERMINATOR, NEXT_TERMINATOR;
@@ -285,6 +287,7 @@ public class PortableConcurrentDirectDeque<E>
         return (Node<E>) NEXT_TERMINATOR;
     }
 
+    @SuppressWarnings("rawtypes")
     static final class Node<E> {
         private static final AtomicReferenceFieldUpdater<Node, Node> prevUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "prev");
         private static final AtomicReferenceFieldUpdater<Node, Node> nextUpdater = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "next");
@@ -330,7 +333,7 @@ public class PortableConcurrentDirectDeque<E>
     /**
      * Links e as first element.
      */
-    private Node linkFirst(E e) {
+    private Node<E> linkFirst(E e) {
         checkNotNull(e);
         final Node<E> newNode = new Node<>(e);
 
@@ -363,7 +366,7 @@ public class PortableConcurrentDirectDeque<E>
     /**
      * Links e as last element.
      */
-    private Node linkLast(E e) {
+    private Node<E> linkLast(E e) {
         checkNotNull(e);
         final Node<E> newNode = new Node<>(e);
 
@@ -904,12 +907,13 @@ public class PortableConcurrentDirectDeque<E>
         return linkLast(e);
     }
 
+    @SuppressWarnings("unchecked")
     public void removeToken(Object token) {
         if (!(token instanceof Node)) {
             throw new IllegalArgumentException();
         }
 
-        Node node = (Node) (token);
+        Node<E> node = (Node<E>) (token);
         while (! node.casItem(node.item, null)) {}
         unlink(node);
     }

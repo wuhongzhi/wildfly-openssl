@@ -24,7 +24,7 @@ import java.security.Security;
  * @author Stuart Douglas
  */
 public final class OpenSSLProvider extends Provider {
-
+	private static final long serialVersionUID = -8805627302805229591L;
     private static boolean registered = false;
 
     public static final OpenSSLProvider INSTANCE = new OpenSSLProvider();

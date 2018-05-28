@@ -54,11 +54,9 @@ class DefaultByteBufferPool {
     private final int leakDetectionPercent;
     private int count; //racily updated count used in leak detection
 
-    @SuppressWarnings({"unused", "FieldCanBeLocal"})
     private volatile int currentQueueLength = 0;
     private static final AtomicIntegerFieldUpdater<DefaultByteBufferPool> currentQueueLengthUpdater = AtomicIntegerFieldUpdater.newUpdater(DefaultByteBufferPool.class, "currentQueueLength");
 
-    @SuppressWarnings({"unused", "FieldCanBeLocal"})
     private volatile int reclaimedThreadLocals = 0;
     private static final AtomicIntegerFieldUpdater<DefaultByteBufferPool> reclaimedThreadLocalsUpdater = AtomicIntegerFieldUpdater.newUpdater(DefaultByteBufferPool.class, "reclaimedThreadLocals");
 

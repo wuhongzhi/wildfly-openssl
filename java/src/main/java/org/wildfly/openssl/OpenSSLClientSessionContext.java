@@ -85,11 +85,7 @@ public final class OpenSSLClientSessionContext extends OpenSSLSessionContext {
             // set with the session pointer from the found session
             final ClientSessionInfo foundSessionPtr = getCacheValue(key);
             if (foundSessionPtr != null) {
-                if(getSession(foundSessionPtr.sessionId) != null) {
                     removeCacheEntry(key);
-                } else {
-                    removeCacheEntry(key);
-                }
             }
             addCacheEntry(key, new ClientSessionInfo(sessionPointer, sessionId, System.currentTimeMillis()));
         }

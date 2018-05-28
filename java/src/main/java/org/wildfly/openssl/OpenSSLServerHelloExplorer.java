@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 
 /**
  */
+@SuppressWarnings("unused")
 final class OpenSSLServerHelloExplorer {
 
     // Private constructor prevents construction outside this class.
